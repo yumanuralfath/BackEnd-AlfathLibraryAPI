@@ -7,13 +7,13 @@ import {
   deleteKategori,
 } from '../controllers/categoryController.js';
 
-const router = express.Router();
+const CategoryRouter = express.Router();
 
 //CRUD
-router.post('/categories', createCategory);
-router.get('/categories', getCategories);
-router.get('/categories/:id', getCategoriesByID);
-router.put('/categories/:id', updateKategori);
-router.delete('/categories/:id', deleteKategori);
+CategoryRouter.post('/categories', createCategory);
+CategoryRouter.get('/categories', getCategories);
+CategoryRouter.get('/categories/:id/books', getCategoriesByID);
+CategoryRouter.put('/categories/:id', updateKategori);
+CategoryRouter.delete('/categories/:id', deleteKategori);
 
-export default router;
+export default CategoryRouter;
