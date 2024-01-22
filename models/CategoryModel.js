@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const Categories = mongoose.Schema({
+const Category = mongoose.Schema({
   id: {
     type: Number,
     required: true,
@@ -21,4 +21,4 @@ const Categories = mongoose.Schema({
   },
 });
 
-export default mongoose.model('Category', Categories);
+export default mongoose.model('Category', Category);
