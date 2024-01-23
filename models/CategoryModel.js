@@ -3,7 +3,7 @@ import db from '../config/Database.js';
 
 const { DataTypes } = Sequelize;
 
-const CategorySchema = db.define(
+const Category = db.define(
   'category',
   {
     name: {
@@ -15,4 +15,4 @@ const CategorySchema = db.define(
   }
 );
 
-export default CategorySchema;
+export default Category;

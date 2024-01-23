@@ -1,6 +1,6 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import db from '../config/Database.js';
-import CategorySchema from './CategoryModel.js';
+import Category from './CategoryModel.js';
 
 const Book = db.define(
   'collectionbooks',
@@ -51,10 +51,66 @@ const Book = db.define(
         };
       },
     },
-  },
+  }
 );
 
-Book.belongsTo(CategorySchema, { foreignKey: 'category_id' });
-CategorySchema.hasMany(Book, { foreignKey: 'category_id' });
+Book.belongsTo(Category, { foreignKey: 'category_id' });
+Category.hasMany(Book, { foreignKey: 'category_id' });
+
+Book.filterBooks = async (queryParams) => {
+  const filterOptions = {
+    where: {},
+    order: [],
+  };
+
+  // Filter by title (case insensitive)
+  if (queryParams.title) {
+    filterOptions.where.title = {
+      [Sequelize.Op.like]: `%${queryParams.title}%`,
+    };
+  }
+
+  // Filter by minYear
+  if (queryParams.minYear) {
+    filterOptions.where.release_year = {
+      [Sequelize.Op.gte]: queryParams.minYear,
+    };
+  }
+
+  // Filter by maxYear
+  if (queryParams.maxYear) {
+    filterOptions.where.release_year = {
+      ...filterOptions.where.release_year,
+      [Sequelize.Op.lte]: queryParams.maxYear,
+    };
+  }
+
+  // Filter by minPage
+  if (queryParams.minPage) {
+    filterOptions.where.total_page = {
+      [Sequelize.Op.gte]: queryParams.minPage,
+    };
+  }
+
+  // Filter by maxPage
+  if (queryParams.maxPage) {
+    filterOptions.where.total_page = {
+      ...filterOptions.where.total_page,
+      [Sequelize.Op.lte]: queryParams.maxPage,
+    };
+  }
+
+  // Sort by title
+  if (queryParams.sortByTitle === 'asc') {
+    filterOptions.order.push(['title', 'ASC']);
+  } else if (queryParams.sortByTitle === 'desc') {
+    filterOptions.order.push(['title', 'DESC']);
+  }
+
+  // Fetch the filtered books
+  const filteredBooks = await Book.findAll(filterOptions);
+
+  return filteredBooks;
+};
 
 export default Book;

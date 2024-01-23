@@ -3,10 +3,18 @@ import Book from '../models/BookModel.js';
 // Menampilkan seluruh buku
 export const getBooks = async (req, res) => {
   try {
-    const books = await Book.findAll();
-    res.json(books);
+    if (Object.keys(req.query).length === 0) {
+      // Jika tidak ada query parameters, tampilkan semua buku tanpa filter
+      const allBooks = await Book.findAll();
+      res.json(allBooks);
+    } else {
+      // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
+      const filteredBooks = await Book.filterBooks(req.query);
+      res.json(filteredBooks);
+    }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
