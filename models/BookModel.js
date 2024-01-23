@@ -1,11 +1,9 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import db from '../config/Database.js';
 import CategorySchema from './CategoryModel.js';
 
-const { DataTypes } = Sequelize;
-
 const Book = db.define(
-  'CollectionBook',
+  'collectionbooks',
   {
     title: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.STRING, allowNull: false },
@@ -53,10 +51,10 @@ const Book = db.define(
         };
       },
     },
-  }
+  },
 );
 
-Book.belongsTo(CategorySchema, { foreignKeys: 'category_id' });
-CategorySchema.hasMany(Book, { foreignKeys: 'category_id' });
+Book.belongsTo(CategorySchema, { foreignKey: 'category_id' });
+CategorySchema.hasMany(Book, { foreignKey: 'category_id' });
 
 export default Book;
