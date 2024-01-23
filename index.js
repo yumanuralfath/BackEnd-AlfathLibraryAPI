@@ -3,7 +3,6 @@ import db from './config/Database.js';
 import cors from 'cors';
 import CategoryRouter from '../BackEnd/routes/CategoryRoute.js';
 import BookRouter from './routes/BookRoute.js';
-// import filterRouter from './routes/FilterRouter.js';
 const app = express();
 
 try {

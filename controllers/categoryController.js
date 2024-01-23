@@ -35,38 +35,31 @@ export const getCategoriesByID = async (req, res) => {
 };
 
 //Update Kategori yang sudah ada berdasarkan ID
+// Controller untuk melakukan operasi PATCH pada kategori berdasarkan ID
 export const updateKategori = async (req, res) => {
-  const categoryId = req.params.id;
-
   try {
-    // Cari kategori berdasarkan ID
-    const category = await CategorySchema.findByPk(categoryId);
+    const { id } = req.params;
+    const { name } = req.body;
 
-    // Jika kategori tidak ditemukan, kirim respons 404
-    if (!category) {
-      res.status(404).json({ message: 'Kategori tidak ditemukan' });
-      return;
+    // Cek apakah kategori dengan ID tersebut ada dalam database
+    const existingCategory = await CategorySchema.findByPk(id);
+
+    if (!existingCategory) {
+      return res.status(404).json({ error: 'Kategori tidak ditemukan' });
     }
 
-    // Update kategori
-    const [updatedRowsCount] = await CategorySchema.update(req.body, {
-      where: { id: categoryId },
+    // Lakukan operasi PATCH pada kategori
+    await existingCategory.update({
+      name: name || existingCategory.name,
     });
 
-    if (updatedRowsCount === 0) {
-      // Jika tidak ada baris yang diupdate, kirim respons 404
-      return res.status(404).json({ message: 'Kategori tidak ditemukan' });
-    }
-
-    // Jika ada baris yang diupdate, temukan kategori yang baru di database
-    const updatedCategory = await CategorySchema.findByPk(categoryId);
-
-    // Kirim respons dengan data kategori yang sudah diupdate
-    res.status(200).json(updatedCategory.get({ plain: true }));
+    // Kirim respons dengan kategori yang telah diperbarui
+    res.json(existingCategory);
   } catch (error) {
-    // Tangani kesalahan jika terjadi
-    console.error('Error updating category:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Internal Server Error', details: error.message });
   }
 };
 
