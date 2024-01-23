@@ -1,9 +1,11 @@
 import express from 'express';
 import db from './config/Database.js';
+import dotenv from 'dotenv';
 import cors from 'cors';
 import CategoryRouter from '../BackEnd/routes/CategoryRoute.js';
 import BookRouter from './routes/BookRoute.js';
 import userRoute from './routes/UserRoute.js';
+dotenv.config();
 const app = express();
 
 try {
