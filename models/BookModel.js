@@ -65,7 +65,7 @@ const Book = db.define(
 Book.belongsTo(Category, { foreignKey: 'category_id' });
 Category.hasMany(Book, { foreignKey: 'category_id' });
 
-Users.hasMany(Book);
+Users.hasMany(Book, { foreignKey: 'userId' });
 Book.belongsTo(Users, { foreignKey: 'userId' });
 
 Book.filterBooks = async (queryParams) => {

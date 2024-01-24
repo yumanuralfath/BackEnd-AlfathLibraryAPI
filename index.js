@@ -20,16 +20,17 @@ try {
 //middleware
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
-app.use('/', CategoryRouter);
-app.use('/', BookRouter);
+app.use(CategoryRouter);
+app.use(BookRouter);
+app.use(userRouter);
 app.use(
   session({
     secret: process.env.SESS_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: 'auto'
-    }
+      secure: 'auto',
+    },
   })
 );
 
