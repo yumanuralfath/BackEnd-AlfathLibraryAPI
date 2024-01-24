@@ -2,10 +2,11 @@ import express from 'express';
 import db from './config/Database.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
 import CategoryRouter from '../BackEnd/routes/CategoryRoute.js';
 import BookRouter from './routes/BookRoute.js';
-import userRoute from './routes/UserRoute.js';
+import userRouter from './routes/UserRoute.js';
+import session from 'express-session';
+
 dotenv.config();
 const app = express();
 
@@ -17,11 +18,19 @@ try {
 }
 
 //middleware
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
-app.use(cookieParser());
 app.use('/', CategoryRouter);
 app.use('/', BookRouter);
-app.use(userRoute);
+app.use(
+  session({
+    secret: process.env.SESS_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: 'auto'
+    }
+  })
+);
 
-app.listen(8080, () => console.log('listening on port 8080'));
+app.listen(process.env.APP_PORT, () => console.log('listening on port 8080'));

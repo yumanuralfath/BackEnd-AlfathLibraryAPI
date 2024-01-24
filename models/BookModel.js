@@ -1,6 +1,7 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import db from '../config/Database.js';
 import Category from './CategoryModel.js';
+import Users from './UserModel.js';
 
 const Book = db.define(
   'collectionbooks',
@@ -21,6 +22,13 @@ const Book = db.define(
     total_page: { type: DataTypes.INTEGER, allowNull: false },
     category_id: { type: DataTypes.INTEGER, allowNull: false },
     thickness: { type: DataTypes.STRING },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
   },
   {
     hooks: {
@@ -56,6 +64,9 @@ const Book = db.define(
 
 Book.belongsTo(Category, { foreignKey: 'category_id' });
 Category.hasMany(Book, { foreignKey: 'category_id' });
+
+Users.hasMany(Book);
+Book.belongsTo(Users, { foreignKey: 'userId' });
 
 Book.filterBooks = async (queryParams) => {
   const filterOptions = {
