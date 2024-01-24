@@ -9,12 +9,13 @@ import {
   updateKategori,
   deleteKategori,
 } from '../controllers/categoryController.js';
+import { verifyUser } from '../middleware/AuthUser.js';
 
 const CategoryRouter = express.Router();
 
 // Route untuk menampilkan seluruh data buku berdasarkan ID kategori
 //fitur route untuk filter
-CategoryRouter.get('/categories/:id/books',  async (req, res) => {
+CategoryRouter.get('/categories/:id/books', verifyUser, async (req, res) => {
   try {
     const { id } = req.params;
     const { sortByTitle, minYear, maxYear, maxPage } = req.query;
@@ -53,10 +54,10 @@ CategoryRouter.get('/categories/:id/books',  async (req, res) => {
 });
 
 //CRUD
-CategoryRouter.post('/categories',  createCategory);
-CategoryRouter.get('/categories',  getCategories);
-CategoryRouter.get('/categories/:id',  getCategoriesByID);
-CategoryRouter.patch('/categories/:id',  updateKategori);
-CategoryRouter.delete('/categories/:id',  deleteKategori);
+CategoryRouter.post('/categories', verifyUser, createCategory);
+CategoryRouter.get('/categories', verifyUser, getCategories);
+CategoryRouter.get('/categories/:id', verifyUser, getCategoriesByID);
+CategoryRouter.patch('/categories/:id', verifyUser, updateKategori);
+CategoryRouter.delete('/categories/:id', verifyUser, deleteKategori);
 
 export default CategoryRouter;
