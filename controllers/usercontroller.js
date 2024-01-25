@@ -52,16 +52,28 @@ export const updateUser = async (req, res) => {
       uuid: req.params.id,
     },
   });
-  if (!user) return res.status(404).json({ msg: 'User not found' });
+
+  if (!user) {
+    return res.status(404).json({ msg: 'User not found' });
+  }
+
   const { name, email, password, confPassword, role } = req.body;
   let hashPassword;
-  if (password === '' || password === null) {
+
+  // Check if password is undefined, null, or an empty string
+  if (password === undefined || password === null || password === '') {
+    // Use the existing hashed password from the database
     hashPassword = user.password;
   } else {
+    // Hash the new password
     hashPassword = await argon2.hash(password);
   }
-  if (password != confPassword)
+
+  // Check if passwords match
+  if (password !== confPassword) {
     return res.status(400).json({ msg: 'Password tidak sama' });
+  }
+
   try {
     await Users.update(
       {
