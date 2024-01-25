@@ -77,14 +77,30 @@ export const getBooks = async (req, res) => {
 //Menampilkan buku sesuai ID
 export const getBookById = async (req, res) => {
   try {
+    let whereCondition;
+
+    // Check if the parameter is a valid UUID
+    if (
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+        req.params.id
+      )
+    ) {
+      whereCondition = { uuid: req.params.id };
+    } else if (!isNaN(req.params.id)) {
+      // If it's a numeric ID, use it
+      whereCondition = { id: req.params.id };
+    } else {
+      return res.status(400).json({ msg: 'Invalid ID format' });
+    }
+
     const book = await Book.findOne({
-      where: {
-        uuid: req.params.id,
-      },
+      where: whereCondition,
     });
+
     if (!book) return res.status(404).json({ msg: 'Buku tidak ditemukan' });
+
     if (req.role === 'admin') {
-      // Menampilkan seluruh buku jika admin login
+      // Admin sees all book details
       const allBooks = await Book.findOne({
         attributes: [
           'id',
@@ -100,9 +116,7 @@ export const getBookById = async (req, res) => {
           'createdAt',
           'updatedAt',
         ],
-        where: {
-          id: book.id,
-        },
+        where: { id: book.id },
         include: [
           {
             model: Users,
@@ -112,11 +126,11 @@ export const getBookById = async (req, res) => {
       });
       res.status(200).json(allBooks);
     } else {
-      // Menampilkan buku berdasarkan userId jika bukan admin
+      // Non-admin users see book details based on userId
       let response;
 
       if (Object.keys(req.query).length === 0) {
-        // Jika tidak ada query parameters, tampilkan buku berdasarkan userId
+        // If no query parameters, show book based on userId
         response = await Book.findOne({
           attributes: [
             'id',
@@ -143,7 +157,7 @@ export const getBookById = async (req, res) => {
           ],
         });
       } else {
-        // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
+        // If there are query parameters, use the filterBooks function to get the filtered books
         response = await Book.filterBooks(req.query);
       }
 
@@ -154,6 +168,7 @@ export const getBookById = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
 
 // Membuat buku baru
 export const createBook = async (req, res) => {
