@@ -24,6 +24,13 @@ const Book = db.define(
         isInt: true,
         min: 1980,
         max: 2021,
+        customValidation(value) {
+          if (value < 1980 || value > 2021) {
+            throw new Error(
+              'Invalid release year. Year must be between 1980 and 2021.'
+            );
+          }
+        },
       },
     },
     price: { type: DataTypes.STRING, allowNull: false },
