@@ -6,36 +6,44 @@ import { Op } from 'sequelize';
 export const getBooks = async (req, res) => {
   try {
     if (req.role === 'admin') {
-      // Menampilkan seluruh buku jika admin login
-      const allBooks = await Book.findAll({
-        attributes: [
-          'id',
-          'uuid',
-          'title',
-          'description',
-          'image',
-          'release_year',
-          'price',
-          'total_page',
-          'category_id',
-          'thickness',
-          'createdAt',
-          'updatedAt',
-        ],
-        include: [
-          {
-            model: Users,
-            attributes: ['name', 'email'],
-          },
-        ],
-      });
-      res.status(200).json(allBooks);
-    } else {
-      // Menampilkan buku berdasarkan userId jika bukan admin
       let response;
 
       if (Object.keys(req.query).length === 0) {
-        // Jika tidak ada query parameters, tampilkan buku berdasarkan userId
+        // If no query parameters, show all books
+        response = await Book.findAll({
+          attributes: [
+            'id',
+            'uuid',
+            'title',
+            'description',
+            'image',
+            'release_year',
+            'price',
+            'total_page',
+            'category_id',
+            'thickness',
+            'createdAt',
+            'updatedAt',
+          ],
+          include: [
+            {
+              model: Users,
+              attributes: ['name', 'email'],
+            },
+          ],
+        });
+      } else {
+        // If there are query parameters, use the filterBooks function
+        response = await Book.filterBooks(req.query);
+      }
+
+      res.status(200).json(response);
+    } else {
+      // Non-admin users or requests without query parameters
+      let response;
+
+      if (Object.keys(req.query).length === 0) {
+        // If no query parameters, show books based on userId
         response = await Book.findAll({
           attributes: [
             'id',
@@ -62,7 +70,7 @@ export const getBooks = async (req, res) => {
           ],
         });
       } else {
-        // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
+        // If there are query parameters, use the filterBooks function
         response = await Book.filterBooks(req.query);
       }
 
@@ -73,6 +81,7 @@ export const getBooks = async (req, res) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
 
 //Menampilkan buku sesuai ID
 export const getBookById = async (req, res) => {
