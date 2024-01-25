@@ -1,20 +1,157 @@
 import Book from '../models/BookModel.js';
+import Users from '../models/UserModel.js';
+import { Op } from 'sequelize';
 
 // Menampilkan seluruh buku
 export const getBooks = async (req, res) => {
   try {
-    if (Object.keys(req.query).length === 0) {
-      // Jika tidak ada query parameters, tampilkan semua buku tanpa filter
-      const allBooks = await Book.findAll();
-      res.json(allBooks);
+    if (req.role === 'admin') {
+      // Menampilkan seluruh buku jika admin login
+      const allBooks = await Book.findAll({
+        attributes: [
+          'id',
+          'uuid',
+          'title',
+          'description',
+          'image',
+          'release_year',
+          'price',
+          'total_page',
+          'category_id',
+          'thickness',
+          'createdAt',
+          'updatedAt',
+        ],
+        include: [
+          {
+            model: Users,
+            attributes: ['name', 'email'],
+          },
+        ],
+      });
+      res.status(200).json(allBooks);
     } else {
-      // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
-      const filteredBooks = await Book.filterBooks(req.query);
-      res.json(filteredBooks);
+      // Menampilkan buku berdasarkan userId jika bukan admin
+      let response;
+
+      if (Object.keys(req.query).length === 0) {
+        // Jika tidak ada query parameters, tampilkan buku berdasarkan userId
+        response = await Book.findAll({
+          attributes: [
+            'id',
+            'uuid',
+            'title',
+            'description',
+            'image',
+            'release_year',
+            'price',
+            'total_page',
+            'category_id',
+            'thickness',
+            'createdAt',
+            'updatedAt',
+          ],
+          where: {
+            userId: req.userId,
+          },
+          include: [
+            {
+              model: Users,
+              attributes: ['name', 'email'],
+            },
+          ],
+        });
+      } else {
+        // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
+        response = await Book.filterBooks(req.query);
+      }
+
+      res.status(200).json(response);
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ msg: error.message });
+  }
+};
+
+//Menampilkan buku sesuai ID
+export const getBookById = async (req, res) => {
+  try {
+    const book = await Book.findOne({
+      where: {
+        uuid: req.params.id,
+      },
+    });
+    if (!book) return res.status(404).json({ msg: 'Buku tidak ditemukan' });
+    if (req.role === 'admin') {
+      // Menampilkan seluruh buku jika admin login
+      const allBooks = await Book.findOne({
+        attributes: [
+          'id',
+          'uuid',
+          'title',
+          'description',
+          'image',
+          'release_year',
+          'price',
+          'total_page',
+          'category_id',
+          'thickness',
+          'createdAt',
+          'updatedAt',
+        ],
+        where: {
+          id: book.id,
+        },
+        include: [
+          {
+            model: Users,
+            attributes: ['name', 'email'],
+          },
+        ],
+      });
+      res.status(200).json(allBooks);
+    } else {
+      // Menampilkan buku berdasarkan userId jika bukan admin
+      let response;
+
+      if (Object.keys(req.query).length === 0) {
+        // Jika tidak ada query parameters, tampilkan buku berdasarkan userId
+        response = await Book.findOne({
+          attributes: [
+            'id',
+            'uuid',
+            'title',
+            'description',
+            'image',
+            'release_year',
+            'price',
+            'total_page',
+            'category_id',
+            'thickness',
+            'createdAt',
+            'updatedAt',
+          ],
+          where: {
+            [Op.and]: [{ id: book.id }, { userId: req.userId }],
+          },
+          include: [
+            {
+              model: Users,
+              attributes: ['name', 'email'],
+            },
+          ],
+        });
+      } else {
+        // Jika ada query parameters, gunakan fungsi filterBooks untuk mendapatkan buku yang difilter
+        response = await Book.filterBooks(req.query);
+      }
+
+      res.status(200).json(response);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: error.message });
   }
 };
 
@@ -39,9 +176,9 @@ export const createBook = async (req, res) => {
       price,
       total_page,
       category_id,
+      userId: req.userId,
     });
-
-    res.json(book);
+    res.status(201).json({ msg: 'Buku Berhasil Ditambahkan' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -80,13 +217,12 @@ export const updateBook = async (req, res) => {
     });
 
     // Kirim respons dengan buku yang telah diperbarui
-    res.json(existingBook);
+    res.status(200).json({ msg: 'Buku berhasil di edit' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 // Menghapus buku berdasarkan id
 export const deleteBook = async (req, res) => {

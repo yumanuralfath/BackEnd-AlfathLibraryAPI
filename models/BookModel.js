@@ -6,6 +6,14 @@ import Users from './UserModel.js';
 const Book = db.define(
   'collectionbooks',
   {
+    uuid: {
+      type: DataTypes.STRING,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
     title: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.STRING, allowNull: false },
     image: { type: DataTypes.STRING, allowNull: false },
@@ -21,14 +29,14 @@ const Book = db.define(
     price: { type: DataTypes.STRING, allowNull: false },
     total_page: { type: DataTypes.INTEGER, allowNull: false },
     category_id: { type: DataTypes.INTEGER, allowNull: false },
-    thickness: { type: DataTypes.STRING }
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   allowNull: false,
-    //   validate: {
-    //     notEmpty: true,
-    //   },
-    // },
+    thickness: { type: DataTypes.STRING },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: true,
+      },
+    },
   },
   {
     hooks: {
@@ -65,8 +73,8 @@ const Book = db.define(
 Book.belongsTo(Category, { foreignKey: 'category_id' });
 Category.hasMany(Book, { foreignKey: 'category_id' });
 
-// Users.hasMany(Book, { foreignKey: 'userId' });
-// Book.belongsTo(Users, { foreignKey: 'userId' });
+Users.hasMany(Book);
+Book.belongsTo(Users, { foreignKey: 'userId' });
 
 Book.filterBooks = async (queryParams) => {
   const filterOptions = {
