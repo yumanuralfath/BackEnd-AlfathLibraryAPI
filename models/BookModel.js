@@ -26,9 +26,9 @@ const Book = db.define(
         max: 2021,
         customValidation(value) {
           if (value < 1980 || value > 2021) {
-            throw new Error(
-              'Invalid release year. Year must be between 1980 and 2021.'
-            );
+            const errorMessage =
+              'Invalid release year. Year must be between 1980 and 2021.';
+            throw new Error(errorMessage);
           }
         },
       },
