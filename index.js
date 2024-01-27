@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import session from 'express-session';
 import sequelizeStore from 'connect-session-sequelize';
-import CategoryRouter from '../BackEnd/routes/CategoryRoute.js';
+import CategoryRouter from './routes/CategoryRoute.js';
 import BookRouter from './routes/BookRoute.js';
 import userRouter from './routes/UserRoute.js';
 import AuthRouter from './routes/AuthRoute.js';
